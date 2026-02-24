@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test-web:
+    name: Lint & Test (Web)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: cd apps/web && npm install
+      - name: Lint
+        run: cd apps/web && npm run lint
+      - name: Build
+        run: cd apps/web && npm run build
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-key
+          VITE_API_URL: http://localhost:3001
+
+  lint-and-test-api:
+    name: Lint & Test (API)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: cd apps/api && npm install
+      - name: Type check
+        run: cd apps/api && npx tsc --noEmit
+      - name: Test
+        run: cd apps/api && npm test
